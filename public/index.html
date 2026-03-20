@@ -12,121 +12,186 @@
             <h1>📒 记账本</h1>
         </header>
 
-        <!-- 统计卡片 -->
-        <div class="stats-cards">
-            <div class="stat-card expense">
-                <div class="stat-label">总支出</div>
-                <div class="stat-value" id="totalExpense">¥0.00</div>
-            </div>
-            <div class="stat-card income">
-                <div class="stat-label">总收入</div>
-                <div class="stat-value" id="totalIncome">¥0.00</div>
-            </div>
-            <div class="stat-card balance">
-                <div class="stat-label">结余</div>
-                <div class="stat-value" id="balance">¥0.00</div>
-            </div>
+        <!-- 导航标签 -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="records">记账</button>
+            <button class="nav-tab" data-tab="categories">分类管理</button>
         </div>
 
-        <!-- 添加记录表单 -->
-        <div class="form-section">
-            <h2>添加记账记录</h2>
-            <form id="recordForm">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="type">类型</label>
-                        <select id="type" name="type" required>
+        <!-- 记账页面 -->
+        <div id="recordsTab" class="tab-content active">
+            <!-- 统计卡片 -->
+            <div class="stats-cards">
+                <div class="stat-card expense">
+                    <div class="stat-label">总支出</div>
+                    <div class="stat-value" id="totalExpense">¥0.00</div>
+                </div>
+                <div class="stat-card income">
+                    <div class="stat-label">总收入</div>
+                    <div class="stat-value" id="totalIncome">¥0.00</div>
+                </div>
+                <div class="stat-card balance">
+                    <div class="stat-label">结余</div>
+                    <div class="stat-value" id="balance">¥0.00</div>
+                </div>
+            </div>
+
+            <!-- 添加记录表单 -->
+            <div class="form-section">
+                <h2>添加记账记录</h2>
+                <form id="recordForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="type">类型</label>
+                            <select id="type" name="type" required>
+                                <option value="expense">支出</option>
+                                <option value="income">收入</option>
+                                <option value="transfer">转账</option>
+                                <option value="loan">贷款</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="amount">金额</label>
+                            <input type="number" id="amount" name="amount" step="0.01" min="0" required placeholder="请输入金额">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="category">分类</label>
+                            <select id="category" name="category_id" required>
+                                <option value="">请选择分类</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="subcategory">子分类</label>
+                            <select id="subcategory" name="subcategory_id">
+                                <option value="">请选择子分类</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="date">日期</label>
+                            <input type="date" id="date" name="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="note">备注</label>
+                            <input type="text" id="note" name="note" placeholder="可选">
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">添加记录</button>
+                        <button type="button" class="btn btn-secondary" id="resetBtn">重置</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 筛选和搜索 -->
+            <div class="filter-section">
+                <h2>筛选记录</h2>
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="filterType">类型</label>
+                        <select id="filterType">
+                            <option value="">全部</option>
                             <option value="expense">支出</option>
                             <option value="income">收入</option>
                             <option value="transfer">转账</option>
                             <option value="loan">贷款</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="amount">金额</label>
-                        <input type="number" id="amount" name="amount" step="0.01" min="0" required placeholder="请输入金额">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="category">分类</label>
-                        <select id="category" name="category_id" required>
-                            <option value="">请选择分类</option>
+                    <div class="filter-group">
+                        <label for="filterCategory">分类</label>
+                        <select id="filterCategory">
+                            <option value="">全部</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="subcategory">子分类</label>
-                        <select id="subcategory" name="subcategory_id">
-                            <option value="">请选择子分类</option>
-                        </select>
+                    <div class="filter-group">
+                        <label for="filterStartDate">开始日期</label>
+                        <input type="date" id="filterStartDate">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterEndDate">结束日期</label>
+                        <input type="date" id="filterEndDate">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterKeyword">搜索</label>
+                        <input type="text" id="filterKeyword" placeholder="搜索备注或分类">
+                    </div>
+                    <div class="filter-group filter-actions">
+                        <button class="btn btn-primary" id="filterBtn">筛选</button>
+                        <button class="btn btn-secondary" id="clearFilterBtn">清空</button>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="date">日期</label>
-                        <input type="date" id="date" name="date" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="note">备注</label>
-                        <input type="text" id="note" name="note" placeholder="可选">
-                    </div>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">添加记录</button>
-                    <button type="button" class="btn btn-secondary" id="resetBtn">重置</button>
-                </div>
-            </form>
-        </div>
+            </div>
 
-        <!-- 筛选和搜索 -->
-        <div class="filter-section">
-            <h2>筛选记录</h2>
-            <div class="filter-row">
-                <div class="filter-group">
-                    <label for="filterType">类型</label>
-                    <select id="filterType">
-                        <option value="">全部</option>
-                        <option value="expense">支出</option>
-                        <option value="income">收入</option>
-                        <option value="transfer">转账</option>
-                        <option value="loan">贷款</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="filterCategory">分类</label>
-                    <select id="filterCategory">
-                        <option value="">全部</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="filterStartDate">开始日期</label>
-                    <input type="date" id="filterStartDate">
-                </div>
-                <div class="filter-group">
-                    <label for="filterEndDate">结束日期</label>
-                    <input type="date" id="filterEndDate">
-                </div>
-                <div class="filter-group">
-                    <label for="filterKeyword">搜索</label>
-                    <input type="text" id="filterKeyword" placeholder="搜索备注或分类">
-                </div>
-                <div class="filter-group filter-actions">
-                    <button class="btn btn-primary" id="filterBtn">筛选</button>
-                    <button class="btn btn-secondary" id="clearFilterBtn">清空</button>
+            <!-- 记录列表 -->
+            <div class="records-section">
+                <h2>记账记录</h2>
+                <div class="records-list" id="recordsList">
+                    <!-- 记录将在这里动态渲染 -->
                 </div>
             </div>
         </div>
 
-        <!-- 记录列表 -->
-        <div class="records-section">
-            <h2>记账记录</h2>
-            <div class="records-list" id="recordsList">
-                <!-- 记录将在这里动态渲染 -->
+        <!-- 分类管理页面 -->
+        <div id="categoriesTab" class="tab-content">
+            <div class="category-section">
+                <h2>分类管理</h2>
+                <p style="color: #666; margin-bottom: 20px;">管理您的一级分类和二级分类，支持添加、编辑、删除操作。</p>
+                
+                <!-- 支出分类 -->
+                <div class="category-type-section">
+                    <div class="category-type-title expense">💸 支出分类</div>
+                    <div class="category-list" id="expenseCategories">
+                        <!-- 动态渲染 -->
+                    </div>
+                    <div class="add-category-form">
+                        <input type="text" id="newExpenseCategory" placeholder="输入新的一级分类名称">
+                        <button class="btn btn-primary btn-small" onclick="addCategory('expense')">添加分类</button>
+                    </div>
+                </div>
+
+                <!-- 收入分类 -->
+                <div class="category-type-section">
+                    <div class="category-type-title income">💰 收入分类</div>
+                    <div class="category-list" id="incomeCategories">
+                        <!-- 动态渲染 -->
+                    </div>
+                    <div class="add-category-form">
+                        <input type="text" id="newIncomeCategory" placeholder="输入新的一级分类名称">
+                        <button class="btn btn-primary btn-small" onclick="addCategory('income')">添加分类</button>
+                    </div>
+                </div>
+
+                <!-- 转账分类 -->
+                <div class="category-type-section">
+                    <div class="category-type-title transfer">💱 转账分类</div>
+                    <div class="category-list" id="transferCategories">
+                        <!-- 动态渲染 -->
+                    </div>
+                    <div class="add-category-form">
+                        <input type="text" id="newTransferCategory" placeholder="输入新的一级分类名称">
+                        <button class="btn btn-primary btn-small" onclick="addCategory('transfer')">添加分类</button>
+                    </div>
+                </div>
+
+                <!-- 贷款分类 -->
+                <div class="category-type-section">
+                    <div class="category-type-title loan">💳 贷款分类</div>
+                    <div class="category-list" id="loanCategories">
+                        <!-- 动态渲染 -->
+                    </div>
+                    <div class="add-category-form">
+                        <input type="text" id="newLoanCategory" placeholder="输入新的一级分类名称">
+                        <button class="btn btn-primary btn-small" onclick="addCategory('loan')">添加分类</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- 编辑模态框 -->
+    <!-- 编辑记录模态框 -->
     <div class="modal" id="editModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -177,6 +242,70 @@
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">保存修改</button>
                     <button type="button" class="btn btn-secondary" id="cancelEdit">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 编辑分类模态框 -->
+    <div class="modal" id="editCategoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑分类</h3>
+                <button class="close-btn" onclick="closeEditCategoryModal()">&times;</button>
+            </div>
+            <form id="editCategoryForm">
+                <input type="hidden" id="editCategoryId">
+                <input type="hidden" id="editCategoryType">
+                <div class="form-group">
+                    <label for="editCategoryName">分类名称</label>
+                    <input type="text" id="editCategoryName" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">保存</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditCategoryModal()">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 编辑子分类模态框 -->
+    <div class="modal" id="editSubcategoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑子分类</h3>
+                <button class="close-btn" onclick="closeEditSubcategoryModal()">&times;</button>
+            </div>
+            <form id="editSubcategoryForm">
+                <input type="hidden" id="editSubcategoryId">
+                <div class="form-group">
+                    <label for="editSubcategoryName">子分类名称</label>
+                    <input type="text" id="editSubcategoryName" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">保存</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditSubcategoryModal()">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 添加子分类模态框 -->
+    <div class="modal" id="addSubcategoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加子分类</h3>
+                <button class="close-btn" onclick="closeAddSubcategoryModal()">&times;</button>
+            </div>
+            <form id="addSubcategoryForm">
+                <input type="hidden" id="addSubcategoryParentId">
+                <div class="form-group">
+                    <label for="addSubcategoryName">子分类名称</label>
+                    <input type="text" id="addSubcategoryName" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">添加</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeAddSubcategoryModal()">取消</button>
                 </div>
             </form>
         </div>
