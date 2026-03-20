@@ -20,12 +20,38 @@ document.addEventListener('DOMContentLoaded', () => {
     loadRecords();
     loadStatistics();
     bindEvents();
+    bindTabEvents();
 });
 
 // 初始化日期输入框
 function initDateInputs() {
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('date').value = today;
+}
+
+// 绑定标签切换事件
+function bindTabEvents() {
+    const tabs = document.querySelectorAll('.nav-tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const targetTab = tab.dataset.tab;
+            
+            // 更新标签样式
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            // 切换内容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(targetTab + 'Tab').classList.add('active');
+            
+            // 如果切换到分类管理页面，渲染分类
+            if (targetTab === 'categories') {
+                renderCategoryManagement();
+            }
+        });
+    });
 }
 
 // 绑定事件
@@ -62,6 +88,11 @@ function bindEvents() {
             closeEditModal();
         }
     });
+
+    // 分类管理表单
+    document.getElementById('editCategoryForm').addEventListener('submit', handleUpdateCategory);
+    document.getElementById('editSubcategoryForm').addEventListener('submit', handleUpdateSubcategory);
+    document.getElementById('addSubcategoryForm').addEventListener('submit', handleAddSubcategory);
 }
 
 // 加载分类
@@ -298,7 +329,7 @@ async function handleAddRecord(e) {
         
         if (result.Errno === 0) {
             showSuccess('添加成功');
-            e.target.reset();
+            document.getElementById('recordForm').reset();
             initDateInputs();
             loadRecords();
             loadStatistics();
@@ -317,24 +348,19 @@ async function editRecord(id) {
     
     document.getElementById('editId').value = record.id;
     document.getElementById('editType').value = record.type;
+    document.getElementById('editAmount').value = record.amount;
+    document.getElementById('editDate').value = record.date;
+    document.getElementById('editNote').value = record.note || '';
     
     // 更新分类选项
     updateEditCategoryOptions();
-    
-    // 设置分类值
     document.getElementById('editCategory').value = record.category_id;
     
     // 更新子分类选项
     updateEditSubcategoryOptions();
-    
-    // 设置其他值
-    setTimeout(() => {
-        document.getElementById('editSubcategory').value = record.subcategory_id || '';
-    }, 0);
-    
-    document.getElementById('editAmount').value = record.amount;
-    document.getElementById('editDate').value = record.date;
-    document.getElementById('editNote').value = record.note || '';
+    if (record.subcategory_id) {
+        document.getElementById('editSubcategory').value = record.subcategory_id;
+    }
     
     document.getElementById('editModal').classList.add('active');
 }
@@ -424,13 +450,279 @@ function clearFilter() {
     document.getElementById('filterStartDate').value = '';
     document.getElementById('filterEndDate').value = '';
     document.getElementById('filterKeyword').value = '';
-    
     loadRecords();
 }
 
+// ==================== 分类管理功能 ====================
+
+// 渲染分类管理页面
+function renderCategoryManagement() {
+    const types = ['expense', 'income', 'transfer', 'loan'];
+    
+    types.forEach(type => {
+        const container = document.getElementById(type + 'Categories');
+        const typeCategories = categories.filter(cat => cat.type === type);
+        
+        if (typeCategories.length === 0) {
+            container.innerHTML = '<p style="color: #999; padding: 10px;">暂无分类</p>';
+            return;
+        }
+        
+        container.innerHTML = typeCategories.map(cat => `
+            <div class="category-item">
+                <div class="category-header">
+                    <span class="category-name">${cat.name}</span>
+                    <div class="category-actions">
+                        <button class="btn btn-edit btn-small" onclick="openEditCategoryModal(${cat.id}, '${cat.name}', '${cat.type}')">编辑</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteCategory(${cat.id})">删除</button>
+                    </div>
+                </div>
+                <div class="subcategory-list">
+                    ${cat.subcategories && cat.subcategories.length > 0 
+                        ? cat.subcategories.map(sub => `
+                            <div class="subcategory-item">
+                                <span class="subcategory-name">${sub.name}</span>
+                                <div class="subcategory-actions">
+                                    <button class="btn-icon edit" onclick="openEditSubcategoryModal(${sub.id}, '${sub.name}')">✏️</button>
+                                    <button class="btn-icon delete" onclick="deleteSubcategory(${sub.id})">🗑️</button>
+                                </div>
+                            </div>
+                        `).join('')
+                        : ''
+                    }
+                    <button class="add-subcategory-btn" onclick="openAddSubcategoryModal(${cat.id})">+ 添加子分类</button>
+                </div>
+            </div>
+        `).join('');
+    });
+}
+
+// 添加一级分类
+async function addCategory(type) {
+    const inputId = 'new' + type.charAt(0).toUpperCase() + type.slice(1) + 'Category';
+    const input = document.getElementById(inputId);
+    const name = input.value.trim();
+    
+    if (!name) {
+        showError('请输入分类名称');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE}/categories`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, type })
+        });
+        
+        const result = await response.json();
+        
+        if (result.Errno === 0) {
+            showSuccess('添加成功');
+            input.value = '';
+            await loadCategories();
+            renderCategoryManagement();
+        } else {
+            showError('添加失败: ' + result.Errmsg);
+        }
+    } catch (error) {
+        showError('添加失败: ' + error.message);
+    }
+}
+
+// 打开编辑分类模态框
+function openEditCategoryModal(id, name, type) {
+    document.getElementById('editCategoryId').value = id;
+    document.getElementById('editCategoryType').value = type;
+    document.getElementById('editCategoryName').value = name;
+    document.getElementById('editCategoryModal').classList.add('active');
+}
+
+// 关闭编辑分类模态框
+function closeEditCategoryModal() {
+    document.getElementById('editCategoryModal').classList.remove('active');
+}
+
+// 更新分类
+async function handleUpdateCategory(e) {
+    e.preventDefault();
+    
+    const id = document.getElementById('editCategoryId').value;
+    const name = document.getElementById('editCategoryName').value.trim();
+    const type = document.getElementById('editCategoryType').value;
+    
+    if (!name) {
+        showError('请输入分类名称');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE}/categories/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, type })
+        });
+        
+        const result = await response.json();
+        
+        if (result.Errno === 0) {
+            showSuccess('更新成功');
+            closeEditCategoryModal();
+            await loadCategories();
+            renderCategoryManagement();
+            updateFilterCategoryOptions();
+        } else {
+            showError('更新失败: ' + result.Errmsg);
+        }
+    } catch (error) {
+        showError('更新失败: ' + error.message);
+    }
+}
+
+// 删除分类
+async function deleteCategory(id) {
+    if (!confirm('确定要删除这个分类吗？该分类下的所有子分类也会被删除。')) return;
+    
+    try {
+        const response = await fetch(`${API_BASE}/categories/${id}`, {
+            method: 'DELETE'
+        });
+        
+        const result = await response.json();
+        
+        if (result.Errno === 0) {
+            showSuccess('删除成功');
+            await loadCategories();
+            renderCategoryManagement();
+            updateFilterCategoryOptions();
+        } else {
+            showError('删除失败: ' + result.Errmsg);
+        }
+    } catch (error) {
+        showError('删除失败: ' + error.message);
+    }
+}
+
+// 打开添加子分类模态框
+function openAddSubcategoryModal(categoryId) {
+    document.getElementById('addSubcategoryParentId').value = categoryId;
+    document.getElementById('addSubcategoryName').value = '';
+    document.getElementById('addSubcategoryModal').classList.add('active');
+}
+
+// 关闭添加子分类模态框
+function closeAddSubcategoryModal() {
+    document.getElementById('addSubcategoryModal').classList.remove('active');
+}
+
+// 添加子分类
+async function handleAddSubcategory(e) {
+    e.preventDefault();
+    
+    const categoryId = document.getElementById('addSubcategoryParentId').value;
+    const name = document.getElementById('addSubcategoryName').value.trim();
+    
+    if (!name) {
+        showError('请输入子分类名称');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE}/categories/subcategories`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ category_id: parseInt(categoryId), name })
+        });
+        
+        const result = await response.json();
+        
+        if (result.Errno === 0) {
+            showSuccess('添加成功');
+            closeAddSubcategoryModal();
+            await loadCategories();
+            renderCategoryManagement();
+        } else {
+            showError('添加失败: ' + result.Errmsg);
+        }
+    } catch (error) {
+        showError('添加失败: ' + error.message);
+    }
+}
+
+// 打开编辑子分类模态框
+function openEditSubcategoryModal(id, name) {
+    document.getElementById('editSubcategoryId').value = id;
+    document.getElementById('editSubcategoryName').value = name;
+    document.getElementById('editSubcategoryModal').classList.add('active');
+}
+
+// 关闭编辑子分类模态框
+function closeEditSubcategoryModal() {
+    document.getElementById('editSubcategoryModal').classList.remove('active');
+}
+
+// 更新子分类
+async function handleUpdateSubcategory(e) {
+    e.preventDefault();
+    
+    const id = document.getElementById('editSubcategoryId').value;
+    const name = document.getElementById('editSubcategoryName').value.trim();
+    
+    if (!name) {
+        showError('请输入子分类名称');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE}/categories/subcategories/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name })
+        });
+        
+        const result = await response.json();
+        
+        if (result.Errno === 0) {
+            showSuccess('更新成功');
+            closeEditSubcategoryModal();
+            await loadCategories();
+            renderCategoryManagement();
+        } else {
+            showError('更新失败: ' + result.Errmsg);
+        }
+    } catch (error) {
+        showError('更新失败: ' + error.message);
+    }
+}
+
+// 删除子分类
+async function deleteSubcategory(id) {
+    if (!confirm('确定要删除这个子分类吗？')) return;
+    
+    try {
+        const response = await fetch(`${API_BASE}/categories/subcategories/${id}`, {
+            method: 'DELETE'
+        });
+        
+        const result = await response.json();
+        
+        if (result.Errno === 0) {
+            showSuccess('删除成功');
+            await loadCategories();
+            renderCategoryManagement();
+        } else {
+            showError('删除失败: ' + result.Errmsg);
+        }
+    } catch (error) {
+        showError('删除失败: ' + error.message);
+    }
+}
+
+// ==================== 工具函数 ====================
+
 // 格式化金额
 function formatMoney(amount) {
-    return '¥' + parseFloat(amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return '¥' + parseFloat(amount).toFixed(2);
 }
 
 // 格式化日期
@@ -438,18 +730,19 @@ function formatDate(dateStr) {
     const date = new Date(dateStr);
     return date.toLocaleDateString('zh-CN', {
         year: 'numeric',
-        month: 'long',
-        day: 'numeric'
+        month: '2-digit',
+        day: '2-digit'
     });
 }
 
 // 显示成功消息
 function showSuccess(message) {
-    // 简单的 alert，可以替换为更优雅的提示
+    // 可以替换为更友好的提示方式
     alert(message);
 }
 
 // 显示错误消息
 function showError(message) {
-    alert('错误: ' + message);
+    // 可以替换为更友好的提示方式
+    alert(message);
 }
