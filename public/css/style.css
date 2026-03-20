@@ -27,6 +27,42 @@ header h1 {
     text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
 }
 
+.main-nav {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.nav-btn {
+    padding: 10px 25px;
+    border: none;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(255,255,255,0.2);
+    color: white;
+}
+
+.nav-btn:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.nav-btn.active {
+    background: white;
+    color: #667eea;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
 /* 统计卡片 */
 .stats-cards {
     display: grid;
@@ -479,4 +515,186 @@ header h1 {
     .form-section, .filter-section, .records-section {
         padding: 15px;
     }
+}
+
+.category-section {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.category-section h2 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
+}
+
+.category-type-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.type-tab {
+    padding: 8px 20px;
+    border: 2px solid #e9ecef;
+    border-radius: 20px;
+    background: white;
+    color: #495057;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.type-tab:hover {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.type-tab.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: transparent;
+}
+
+.category-actions {
+    margin-bottom: 20px;
+}
+
+.category-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.category-item {
+    background: #f8f9fa;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-left: 4px solid #667eea;
+}
+
+.category-name {
+    font-weight: 600;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.category-actions-row {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+}
+
+.btn-add {
+    background: #51cf66;
+    color: white;
+}
+
+.btn-add:hover {
+    background: #40c057;
+}
+
+.btn-edit-sm {
+    background: #339af0;
+    color: white;
+}
+
+.btn-edit-sm:hover {
+    background: #228be6;
+}
+
+.btn-delete-sm {
+    background: #ff6b6b;
+    color: white;
+}
+
+.btn-delete-sm:hover {
+    background: #fa5252;
+}
+
+.subcategory-list {
+    padding: 10px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: white;
+}
+
+.subcategory-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: #e9ecef;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+.subcategory-item .sub-name {
+    color: #333;
+}
+
+.subcategory-item .sub-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.subcategory-item .btn-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    transition: all 0.2s ease;
+}
+
+.subcategory-item .btn-edit-icon {
+    background: #339af0;
+    color: white;
+}
+
+.subcategory-item .btn-edit-icon:hover {
+    background: #228be6;
+}
+
+.subcategory-item .btn-delete-icon {
+    background: #ff6b6b;
+    color: white;
+}
+
+.subcategory-item .btn-delete-icon:hover {
+    background: #fa5252;
+}
+
+.empty-category {
+    text-align: center;
+    padding: 40px;
+    color: #868e96;
+}
+
+.empty-category-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
 }

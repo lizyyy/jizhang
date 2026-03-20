@@ -445,7 +445,6 @@ function formatDate(dateStr) {
 
 // 显示成功消息
 function showSuccess(message) {
-    // 简单的 alert，可以替换为更优雅的提示
     alert(message);
 }
 
@@ -453,3 +452,286 @@ function showSuccess(message) {
 function showError(message) {
     alert('错误: ' + message);
 }
+
+let currentCategoryType = 'expense';
+
+function bindCategoryEvents() {
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const tab = e.target.dataset.tab;
+            switchTab(tab);
+        });
+    });
+
+    document.querySelectorAll('.type-tab').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const type = e.target.dataset.type;
+            switchCategoryType(type);
+        });
+    });
+
+    document.getElementById('addCategoryBtn').addEventListener('click', () => {
+        openCategoryModal();
+    });
+
+    document.getElementById('categoryForm').addEventListener('submit', handleCategorySubmit);
+    document.getElementById('closeCategoryModal').addEventListener('click', closeCategoryModal);
+    document.getElementById('cancelCategory').addEventListener('click', closeCategoryModal);
+
+    document.getElementById('subcategoryForm').addEventListener('submit', handleSubcategorySubmit);
+    document.getElementById('closeSubcategoryModal').addEventListener('click', closeSubcategoryModal);
+    document.getElementById('cancelSubcategory').addEventListener('click', closeSubcategoryModal);
+
+    document.getElementById('categoryModal').addEventListener('click', (e) => {
+        if (e.target.id === 'categoryModal') {
+            closeCategoryModal();
+        }
+    });
+
+    document.getElementById('subcategoryModal').addEventListener('click', (e) => {
+        if (e.target.id === 'subcategoryModal') {
+            closeSubcategoryModal();
+        }
+    });
+}
+
+function switchTab(tab) {
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+    });
+
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+
+    document.getElementById(`${tab}Tab`).classList.add('active');
+
+    if (tab === 'categories') {
+        renderCategoryList();
+    }
+}
+
+function switchCategoryType(type) {
+    currentCategoryType = type;
+    document.querySelectorAll('.type-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.type === type);
+    });
+    renderCategoryList();
+}
+
+function renderCategoryList() {
+    const container = document.getElementById('categoryList');
+    const filteredCategories = categories.filter(cat => cat.type === currentCategoryType);
+
+    if (filteredCategories.length === 0) {
+        container.innerHTML = `
+            <div class="empty-category">
+                <div class="empty-category-icon">📁</div>
+                <p>暂无${TYPE_MAP[currentCategoryType].label}分类</p>
+                <p style="font-size: 0.9rem; margin-top: 10px;">点击上方按钮添加分类</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = filteredCategories.map(cat => `
+        <div class="category-item">
+            <div class="category-header">
+                <span class="category-name">${cat.name}</span>
+                <div class="category-actions-row">
+                    <button class="btn btn-sm btn-add" onclick="openSubcategoryModal(${cat.id})">+ 子分类</button>
+                    <button class="btn btn-sm btn-edit-sm" onclick="editCategory(${cat.id})">编辑</button>
+                    <button class="btn btn-sm btn-delete-sm" onclick="deleteCategory(${cat.id})">删除</button>
+                </div>
+            </div>
+            <div class="subcategory-list">
+                ${cat.subcategories && cat.subcategories.length > 0 
+                    ? cat.subcategories.map(sub => `
+                        <div class="subcategory-item">
+                            <span class="sub-name">${sub.name}</span>
+                            <div class="sub-actions">
+                                <button class="btn-icon btn-edit-icon" onclick="editSubcategory(${sub.id}, '${sub.name}', ${cat.id})">✎</button>
+                                <button class="btn-icon btn-delete-icon" onclick="deleteSubcategory(${sub.id})">×</button>
+                            </div>
+                        </div>
+                    `).join('')
+                    : '<span style="color: #868e96; font-size: 0.9rem;">暂无子分类</span>'
+                }
+            </div>
+        </div>
+    `).join('');
+}
+
+function openCategoryModal(category = null) {
+    const modal = document.getElementById('categoryModal');
+    const title = document.getElementById('categoryModalTitle');
+    const form = document.getElementById('categoryForm');
+
+    if (category) {
+        title.textContent = '编辑一级分类';
+        document.getElementById('categoryId').value = category.id;
+        document.getElementById('categoryName').value = category.name;
+        document.getElementById('categoryType').value = category.type;
+    } else {
+        title.textContent = '添加一级分类';
+        form.reset();
+        document.getElementById('categoryId').value = '';
+        document.getElementById('categoryType').value = currentCategoryType;
+    }
+
+    modal.classList.add('active');
+}
+
+function closeCategoryModal() {
+    document.getElementById('categoryModal').classList.remove('active');
+}
+
+async function handleCategorySubmit(e) {
+    e.preventDefault();
+
+    const id = document.getElementById('categoryId').value;
+    const formData = new FormData(e.target);
+    const data = {
+        name: formData.get('name'),
+        type: formData.get('type')
+    };
+
+    try {
+        const url = id ? `${API_BASE}/categories/${id}` : `${API_BASE}/categories`;
+        const method = id ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.Errno === 0) {
+            showSuccess(id ? '更新成功' : '添加成功');
+            closeCategoryModal();
+            await loadCategories();
+            renderCategoryList();
+        } else {
+            showError((id ? '更新' : '添加') + '失败: ' + result.Errmsg);
+        }
+    } catch (error) {
+        showError((id ? '更新' : '添加') + '失败: ' + error.message);
+    }
+}
+
+function editCategory(id) {
+    const category = categories.find(cat => cat.id === id);
+    if (category) {
+        openCategoryModal(category);
+    }
+}
+
+async function deleteCategory(id) {
+    if (!confirm('确定要删除这个分类吗？删除后该分类下的所有子分类也会被删除。')) return;
+
+    try {
+        const response = await fetch(`${API_BASE}/categories/${id}`, {
+            method: 'DELETE'
+        });
+
+        const result = await response.json();
+
+        if (result.Errno === 0) {
+            showSuccess('删除成功');
+            await loadCategories();
+            renderCategoryList();
+        } else {
+            showError('删除失败: ' + result.Errmsg);
+        }
+    } catch (error) {
+        showError('删除失败: ' + error.message);
+    }
+}
+
+function openSubcategoryModal(categoryId, subcategory = null) {
+    const modal = document.getElementById('subcategoryModal');
+    const title = document.getElementById('subcategoryModalTitle');
+    const form = document.getElementById('subcategoryForm');
+
+    if (subcategory) {
+        title.textContent = '编辑子分类';
+        document.getElementById('subcategoryId').value = subcategory.id;
+        document.getElementById('subcategoryName').value = subcategory.name;
+    } else {
+        title.textContent = '添加子分类';
+        form.reset();
+        document.getElementById('subcategoryId').value = '';
+    }
+
+    document.getElementById('parentCategoryId').value = categoryId;
+    modal.classList.add('active');
+}
+
+function closeSubcategoryModal() {
+    document.getElementById('subcategoryModal').classList.remove('active');
+}
+
+async function handleSubcategorySubmit(e) {
+    e.preventDefault();
+
+    const id = document.getElementById('subcategoryId').value;
+    const categoryId = document.getElementById('parentCategoryId').value;
+    const name = document.getElementById('subcategoryName').value;
+
+    try {
+        const url = id ? `${API_BASE}/categories/subcategories/${id}` : `${API_BASE}/categories/subcategories`;
+        const method = id ? 'PUT' : 'POST';
+        const data = id ? { name } : { category_id: parseInt(categoryId), name };
+
+        const response = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.Errno === 0) {
+            showSuccess(id ? '更新成功' : '添加成功');
+            closeSubcategoryModal();
+            await loadCategories();
+            renderCategoryList();
+        } else {
+            showError((id ? '更新' : '添加') + '失败: ' + result.Errmsg);
+        }
+    } catch (error) {
+        showError((id ? '更新' : '添加') + '失败: ' + error.message);
+    }
+}
+
+function editSubcategory(id, name, categoryId) {
+    openSubcategoryModal(categoryId, { id, name });
+}
+
+async function deleteSubcategory(id) {
+    if (!confirm('确定要删除这个子分类吗？')) return;
+
+    try {
+        const response = await fetch(`${API_BASE}/categories/subcategories/${id}`, {
+            method: 'DELETE'
+        });
+
+        const result = await response.json();
+
+        if (result.Errno === 0) {
+            showSuccess('删除成功');
+            await loadCategories();
+            renderCategoryList();
+        } else {
+            showError('删除失败: ' + result.Errmsg);
+        }
+    } catch (error) {
+        showError('删除失败: ' + error.message);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    bindCategoryEvents();
+});
