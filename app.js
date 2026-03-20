@@ -5,7 +5,7 @@ const { initDatabase } = require('./models/db');
 const { errorResponse } = require('./utils/response');
 
 const app = express();
-const PORT = process.env.PORT || 8003;
+const PORT = process.env.PORT || 9001;
 
 // 中间件
 app.use(cors());
