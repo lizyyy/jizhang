@@ -124,6 +124,64 @@
                 <!-- 记录将在这里动态渲染 -->
             </div>
         </div>
+
+        <!-- 分类管理 -->
+        <div class="category-section">
+            <div class="section-header">
+                <h2>分类管理</h2>
+                <div class="section-actions">
+                    <button class="btn btn-primary" id="addCategoryBtn">+ 添加分类</button>
+                </div>
+            </div>
+            
+            <!-- 分类类型切换 -->
+            <div class="category-tabs">
+                <button class="category-tab active" data-type="expense">支出</button>
+                <button class="category-tab" data-type="income">收入</button>
+                <button class="category-tab" data-type="transfer">转账</button>
+                <button class="category-tab" data-type="loan">贷款</button>
+            </div>
+
+            <!-- 分类列表 -->
+            <div class="category-list" id="categoryList">
+                <!-- 分类将在这里动态渲染 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑分类模态框 -->
+    <div class="modal" id="categoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="categoryModalTitle">添加分类</h3>
+                <button class="close-btn" id="closeCategoryModal">&times;</button>
+            </div>
+            <form id="categoryForm">
+                <input type="hidden" id="categoryId">
+                <input type="hidden" id="categoryAction" value="create">
+                <input type="hidden" id="parentCategoryId">
+                
+                <div class="form-group">
+                    <label for="categoryName">分类名称</label>
+                    <input type="text" id="categoryName" name="name" required placeholder="请输入分类名称">
+                </div>
+                
+                <div class="form-group" id="categoryTypeGroup">
+                    <label for="categoryType">分类类型</label>
+                    <select id="categoryType" name="type">
+                        <option value="expense">支出</option>
+                        <option value="income">收入</option>
+                        <option value="transfer">转账</option>
+                        <option value="loan">贷款</option>
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">保存</button>
+                    <button type="button" class="btn btn-secondary" id="cancelCategory">取消</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- 编辑模态框 -->

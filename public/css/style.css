@@ -480,3 +480,248 @@ header h1 {
         padding: 15px;
     }
 }
+
+/* 分类管理样式 */
+.category-section {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
+}
+
+.section-header h2 {
+    color: #333;
+    font-size: 1.3rem;
+    margin: 0;
+}
+
+.section-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* 分类标签页 */
+.category-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.category-tab {
+    padding: 10px 20px;
+    border: 2px solid #e9ecef;
+    background: #f8f9fa;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    color: #555;
+}
+
+.category-tab:hover {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.category-tab.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: transparent;
+}
+
+/* 分类列表 */
+.category-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.category-item {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.category-item:hover {
+    background: #e9ecef;
+    transform: translateX(5px);
+}
+
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.category-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.category-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    background: #e9ecef;
+}
+
+.category-item.expense .category-icon {
+    background: #ffe3e3;
+}
+
+.category-item.income .category-icon {
+    background: #d3f9d8;
+}
+
+.category-item.transfer .category-icon {
+    background: #d0ebff;
+}
+
+.category-item.loan .category-icon {
+    background: #ffec99;
+}
+
+.category-name {
+    font-weight: 600;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.category-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.category-actions .btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+}
+
+/* 子分类列表 */
+.subcategory-list {
+    margin-left: 52px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.subcategory-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: white;
+    border-radius: 8px;
+    border-left: 3px solid #667eea;
+}
+
+.subcategory-name {
+    color: #555;
+    font-size: 0.95rem;
+}
+
+.subcategory-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.subcategory-actions .btn {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+}
+
+.add-subcategory-btn {
+    margin-left: 52px;
+    margin-top: 10px;
+    padding: 8px 16px;
+    background: #f0f0f0;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #666;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.add-subcategory-btn:hover {
+    border-color: #667eea;
+    color: #667eea;
+    background: #f8f9ff;
+}
+
+/* 空状态 */
+.category-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #868e96;
+}
+
+.category-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .category-section {
+        padding: 20px;
+    }
+
+    .section-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+
+    .section-actions .btn {
+        width: 100%;
+    }
+
+    .category-tabs {
+        justify-content: center;
+    }
+
+    .category-tab {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+
+    .category-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+
+    .category-actions {
+        justify-content: center;
+    }
+
+    .subcategory-item {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
+    }
+
+    .subcategory-actions {
+        justify-content: center;
+    }
+}
