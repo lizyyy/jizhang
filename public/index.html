@@ -10,8 +10,14 @@
     <div class="container">
         <header>
             <h1>📒 记账本</h1>
+            <nav class="main-nav">
+                <button class="nav-btn active" data-tab="records">记账</button>
+                <button class="nav-btn" data-tab="categories">分类管理</button>
+            </nav>
         </header>
 
+        <!-- 记账页面 -->
+        <div id="recordsTab" class="tab-content active">
         <!-- 统计卡片 -->
         <div class="stats-cards">
             <div class="stat-card expense">
@@ -124,7 +130,28 @@
                 <!-- 记录将在这里动态渲染 -->
             </div>
         </div>
-    </div>
+        </div>
+
+        <!-- 分类管理页面 -->
+        <div id="categoriesTab" class="tab-content">
+            <div class="category-section">
+                <h2>分类管理</h2>
+                <div class="category-type-tabs">
+                    <button class="type-tab active" data-type="expense">支出</button>
+                    <button class="type-tab" data-type="income">收入</button>
+                    <button class="type-tab" data-type="transfer">转账</button>
+                    <button class="type-tab" data-type="loan">贷款</button>
+                </div>
+                
+                <div class="category-actions">
+                    <button class="btn btn-primary" id="addCategoryBtn">+ 添加一级分类</button>
+                </div>
+                
+                <div class="category-list" id="categoryList">
+                    <!-- 分类将在这里动态渲染 -->
+                </div>
+            </div>
+        </div>
 
     <!-- 编辑模态框 -->
     <div class="modal" id="editModal">
@@ -177,6 +204,58 @@
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">保存修改</button>
                     <button type="button" class="btn btn-secondary" id="cancelEdit">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 分类管理模态框 -->
+    <div class="modal" id="categoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="categoryModalTitle">添加一级分类</h3>
+                <button class="close-btn" id="closeCategoryModal">&times;</button>
+            </div>
+            <form id="categoryForm">
+                <input type="hidden" id="categoryId">
+                <div class="form-group">
+                    <label for="categoryName">分类名称</label>
+                    <input type="text" id="categoryName" name="name" required placeholder="请输入分类名称">
+                </div>
+                <div class="form-group">
+                    <label for="categoryType">分类类型</label>
+                    <select id="categoryType" name="type" required>
+                        <option value="expense">支出</option>
+                        <option value="income">收入</option>
+                        <option value="transfer">转账</option>
+                        <option value="loan">贷款</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">保存</button>
+                    <button type="button" class="btn btn-secondary" id="cancelCategory">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 子分类管理模态框 -->
+    <div class="modal" id="subcategoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="subcategoryModalTitle">添加子分类</h3>
+                <button class="close-btn" id="closeSubcategoryModal">&times;</button>
+            </div>
+            <form id="subcategoryForm">
+                <input type="hidden" id="subcategoryId">
+                <input type="hidden" id="parentCategoryId">
+                <div class="form-group">
+                    <label for="subcategoryName">子分类名称</label>
+                    <input type="text" id="subcategoryName" name="name" required placeholder="请输入子分类名称">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">保存</button>
+                    <button type="button" class="btn btn-secondary" id="cancelSubcategory">取消</button>
                 </div>
             </form>
         </div>

@@ -50,7 +50,6 @@ function initDatabase() {
 }
 
 function initDefaultData() {
-    // 检查是否已有数据
     db.get('SELECT COUNT(*) as count FROM categories', (err, row) => {
         if (err) {
             console.error('检查分类数据失败:', err);
@@ -58,49 +57,63 @@ function initDefaultData() {
         }
         
         if (row.count === 0) {
-            // 插入默认支出分类
-            const expenseCategories = [
-                { name: '餐饮', type: 'expense' },
-                { name: '交通', type: 'expense' },
-                { name: '购物', type: 'expense' },
-                { name: '娱乐', type: 'expense' },
-                { name: '医疗', type: 'expense' },
-                { name: '教育', type: 'expense' },
-                { name: '住房', type: 'expense' },
-                { name: '其他支出', type: 'expense' }
-            ];
+            const categoriesWithSubcategories = {
+                expense: [
+                    { name: '餐饮', subcategories: ['早餐', '午餐', '晚餐', '零食饮料', '外卖', '聚餐'] },
+                    { name: '交通', subcategories: ['公交地铁', '打车', '加油', '停车费', '过路费', '汽车保养'] },
+                    { name: '购物', subcategories: ['日用品', '服饰', '数码产品', '家电', '化妆品', '网购'] },
+                    { name: '娱乐', subcategories: ['电影', '游戏', 'KTV', '旅游', '运动健身', '兴趣爱好'] },
+                    { name: '医疗', subcategories: ['药品', '门诊', '住院', '体检', '保健品'] },
+                    { name: '教育', subcategories: ['学费', '培训', '书籍', '文具', '网课'] },
+                    { name: '住房', subcategories: ['房租', '水电费', '物业费', '装修', '维修'] },
+                    { name: '其他支出', subcategories: ['红包', '礼物', '捐赠', '杂项'] }
+                ],
+                income: [
+                    { name: '工资', subcategories: ['基本工资', '绩效奖金', '年终奖', '加班费'] },
+                    { name: '奖金', subcategories: ['项目奖金', '季度奖金', '节日奖金', '其他奖金'] },
+                    { name: '投资', subcategories: ['股票', '基金', '理财', '分红', '利息'] },
+                    { name: '兼职', subcategories: ['自由职业', '副业', '临时工作'] },
+                    { name: '其他收入', subcategories: ['红包', '退款', '报销', '意外收入'] }
+                ],
+                transfer: [
+                    { name: '银行卡转账', subcategories: ['同行转账', '跨行转账', '定期存款'] },
+                    { name: '支付宝转账', subcategories: ['转账', '充值', '提现'] },
+                    { name: '微信转账', subcategories: ['转账', '充值', '提现'] }
+                ],
+                loan: [
+                    { name: '借款', subcategories: ['借出', '借入'] },
+                    { name: '还款', subcategories: ['还本金', '还利息', '提前还款'] }
+                ]
+            };
 
-            // 插入默认收入分类
-            const incomeCategories = [
-                { name: '工资', type: 'income' },
-                { name: '奖金', type: 'income' },
-                { name: '投资', type: 'income' },
-                { name: '兼职', type: 'income' },
-                { name: '其他收入', type: 'income' }
-            ];
+            db.serialize(() => {
+                const stmt = db.prepare('INSERT INTO categories (name, type) VALUES (?, ?)');
+                
+                Object.entries(categoriesWithSubcategories).forEach(([type, cats]) => {
+                    cats.forEach(cat => {
+                        stmt.run(cat.name, type);
+                    });
+                });
+                stmt.finalize();
 
-            // 插入默认转账分类
-            const transferCategories = [
-                { name: '银行卡转账', type: 'transfer' },
-                { name: '支付宝转账', type: 'transfer' },
-                { name: '微信转账', type: 'transfer' }
-            ];
-
-            // 插入默认贷款分类
-            const loanCategories = [
-                { name: '借款', type: 'loan' },
-                { name: '还款', type: 'loan' }
-            ];
-
-            const allCategories = [...expenseCategories, ...incomeCategories, ...transferCategories, ...loanCategories];
-            
-            const stmt = db.prepare('INSERT INTO categories (name, type) VALUES (?, ?)');
-            allCategories.forEach(cat => {
-                stmt.run(cat.name, cat.type);
+                db.each('SELECT id, name, type FROM categories', [], (err, category) => {
+                    if (err) return;
+                    
+                    const typeData = categoriesWithSubcategories[category.type];
+                    if (typeData) {
+                        const catData = typeData.find(c => c.name === category.name);
+                        if (catData && catData.subcategories) {
+                            const subStmt = db.prepare('INSERT INTO subcategories (category_id, name) VALUES (?, ?)');
+                            catData.subcategories.forEach(subName => {
+                                subStmt.run(category.id, subName);
+                            });
+                            subStmt.finalize();
+                        }
+                    }
+                }, () => {
+                    console.log('默认分类和子分类数据已初始化');
+                });
             });
-            stmt.finalize();
-
-            console.log('默认分类数据已初始化');
         }
     });
 }
