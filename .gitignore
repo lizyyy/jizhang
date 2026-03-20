@@ -1,3 +1,4 @@
 node_modules/
-data/*.db
-*.log
+data/
+*.db
+.DS_Store
